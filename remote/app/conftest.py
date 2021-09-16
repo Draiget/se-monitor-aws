@@ -1,4 +1,5 @@
 import sys, os
 
-here = os.path.abspath("hello_world_function")
+# TODO: Tests?
+here = os.path.abspath("function_operate")
 sys.path.insert(0, here)

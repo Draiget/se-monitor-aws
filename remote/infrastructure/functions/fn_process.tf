@@ -1,19 +1,8 @@
 #
-# Process Lambda ZIP file definition
-#
-data "archive_file" "sm_process_lambda_zip" {
-  type             = "zip"
-  source_dir       = "${path.module}/../../app/function_process"
-  output_file_mode = "0666"
-  output_path      = "${path.module}/../../app/target/process.zip"
-}
-
-#
 # Process Lambda description
 #
-
 resource "aws_lambda_function" "sm_gw_process_lambda" {
-  filename      = data.archive_file.sm_process_lambda_zip.output_path
+  filename      = "${local.lambda_base_path}/process.zip"
   function_name = "sm-process"
 
   role          = aws_iam_role.sm_operational_lambda_role.arn
@@ -21,7 +10,7 @@ resource "aws_lambda_function" "sm_gw_process_lambda" {
   runtime       = local.lambda_runtime
   layers        = [aws_lambda_layer_version.sm_lambda_shared_layer.arn]
 
-  source_code_hash = data.archive_file.sm_process_lambda_zip.output_base64sha256
+  source_code_hash = filebase64sha256("${local.lambda_base_path}/process.zip")
 
   vpc_config {
     subnet_ids         = var.in_net_subnet_ids

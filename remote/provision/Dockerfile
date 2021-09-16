@@ -16,5 +16,5 @@ WORKDIR /opt/se-mon/
 COPY initialize.py /opt/se-mon/
 VOLUME ["/var/tf"]
 
-# Set the entrypoint as we might have to use aguments of our initialization script
+# Set the entrypoint as we might have to use arguments of our initialization script
 ENTRYPOINT ["python3", "initialize.py"]

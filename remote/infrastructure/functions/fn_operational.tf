@@ -1,18 +1,9 @@
-#
-# Operational Lambda ZIP file definition
-#
-data "archive_file" "sm_operator_lambda_zip" {
-  type             = "zip"
-  source_dir       = "${path.module}/../../app/function_operate"
-  output_file_mode = "0666"
-  output_path      = "${path.module}/../../app/target/operate.zip"
-}
 
 #
 # Operational Lambda description
 #
 resource "aws_lambda_function" "sm_gw_operator_lambda" {
-  filename      = data.archive_file.sm_operator_lambda_zip.output_path
+  filename      = "${local.lambda_base_path}/operate.zip"
   function_name = "sm-operator"
 
   role          = aws_iam_role.sm_operational_lambda_role.arn
@@ -20,7 +11,7 @@ resource "aws_lambda_function" "sm_gw_operator_lambda" {
   runtime       = local.lambda_runtime
   layers        = [aws_lambda_layer_version.sm_lambda_shared_layer.arn]
 
-  source_code_hash = data.archive_file.sm_operator_lambda_zip.output_base64sha256
+  source_code_hash = filebase64sha256("${local.lambda_base_path}/operate.zip")
 
   vpc_config {
     subnet_ids         = var.in_net_subnet_ids

@@ -2,13 +2,10 @@ import boto3
 import logging
 import json
 import crhelper
-import requests
 import datetime
 from datetime import datetime
 import valve.source.master_server
 from botocore.exceptions import ClientError
-
-import shared
 
 logger = logging.getLogger(__name__)
 helper = crhelper.CfnResource(json_logging=True, log_level='DEBUG')

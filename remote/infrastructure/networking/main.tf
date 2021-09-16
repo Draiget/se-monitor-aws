@@ -98,7 +98,18 @@ resource "aws_api_gateway_deployment" "se_gw_api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.se_api_gw.id
 
   triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.se_api_gw.body))
+    # NOTE: The configuration below will satisfy ordering considerations,
+    #       but not pick up all future REST API changes. More advanced patterns
+    #       are possible, such as using the filesha1() function against the
+    #       Terraform configuration file(s) or removing the .id references to
+    #       calculate a hash against whole resources. Be aware that using whole
+    #       resources will show a difference after the initial implementation.
+    #       It will stabilize to only change when resources change afterwards.
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_rest_api.se_api_gw.body,
+      aws_api_gateway_resource.se_api_gw_process_resource.id,
+      aws_api_gateway_method.se_api_gw_process_method.id,
+    ]))
   }
 
   lifecycle {
@@ -109,10 +120,29 @@ resource "aws_api_gateway_deployment" "se_gw_api_deployment" {
 #
 # Stages for API (generic, based on local variables)
 #
-resource "aws_api_gateway_stage" "se_gw_dev_stage" {
+resource "aws_api_gateway_stage" "se_gw_stage" {
   for_each = local.stages
 
   deployment_id = aws_api_gateway_deployment.se_gw_api_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.se_api_gw.id
   stage_name    = each.key
+}
+
+resource "aws_api_gateway_usage_plan" "se_api_gw_usage_plan" {
+  for_each = local.stages
+  name     = "operate_${each.key}_usage_plan"
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.se_api_gw.id
+    stage = aws_api_gateway_stage.se_gw_stage[each.key].stage_name
+  }
+}
+
+resource "aws_api_gateway_usage_plan_key" "se_api_gw_usage_plan_key" {
+  for_each = local.stages
+
+  key_id = aws_api_gateway_api_key.se_api_gw_key.id
+  key_type = "API_KEY"
+
+  usage_plan_id = aws_api_gateway_usage_plan.se_api_gw_usage_plan[each.key].id
 }

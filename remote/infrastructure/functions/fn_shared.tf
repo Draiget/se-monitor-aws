@@ -3,12 +3,15 @@
 #
 data "aws_caller_identity" "current" {}
 
-data "archive_file" "sm_lambda_shared_layer_zip" {
-  type             = "zip"
-  source_dir       = "${path.module}/../../app/shared"
-  output_file_mode = "0666"
-  output_path      = "${path.module}/../../app/target/shared.zip"
-}
+#
+# Due to terraform call base64sha256 before any apply actions, below script is not being executed before it
+# Ref: https://github.com/hashicorp/terraform/issues/22036#issuecomment-510558357
+#
+#resource "null_resource" "sm_pack_operator_lambda" {
+#  provisioner "local-exec" {
+#    command = "(cd ${path.module}/../.. && sh ./lambda_build.sh)"
+#  }
+#}
 
 #
 # Create and upload shared layer zip file to S3 bucket
@@ -16,7 +19,9 @@ data "archive_file" "sm_lambda_shared_layer_zip" {
 resource "aws_s3_bucket_object" "sm_s3_shared_layer" {
   bucket = aws_s3_bucket.sm_lambda_bucket.id
   key    = "lambda/layers/shared.zip"
-  source = data.archive_file.sm_lambda_shared_layer_zip.output_path
+
+  # depends_on = [null_resource.sm_pack_operator_lambda]
+  source = "${local.lambda_base_path}/shared.zip"
 }
 
 #
@@ -31,4 +36,6 @@ resource "aws_lambda_layer_version" "sm_lambda_shared_layer" {
 
   description = "Shared Lambda layer for Source Monitoring"
   compatible_runtimes = [local.lambda_runtime]
+
+  source_code_hash = filebase64sha256("${local.lambda_base_path}/shared.zip")
 }

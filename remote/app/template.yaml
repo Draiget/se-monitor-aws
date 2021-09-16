@@ -23,7 +23,20 @@ Resources:
         Collect:
           Type: Api
           Properties:
-            Path: /collect
+            Path: /process
+            Method: get
+
+  SmOperateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function_operate/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Events:
+        Collect:
+          Type: Api
+          Properties:
+            Path: /operate
             Method: get
 
   SharedLayer:
@@ -41,8 +54,14 @@ Outputs:
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   SmProcessFunction:
-    Description: "Hello World Lambda Function ARN"
+    Description: "Process Lambda Function ARN"
     Value: !GetAtt SmProcessFunction.Arn
   SmProcessFunctionRole:
-    Description: "Implicit IAM Role created for Hello World function"
+    Description: "Implicit IAM Role created for process function"
     Value: !GetAtt SmProcessFunctionRole.Arn
+  SmOperateFunction:
+    Description: "Operate Lambda Function ARN"
+    Value: !GetAtt SmOperateFunction.Arn
+  SmOperateFunctionRole:
+    Description: "Implicit IAM Role created for operate function"
+    Value: !GetAtt SmOperateFunctionRole.Arn

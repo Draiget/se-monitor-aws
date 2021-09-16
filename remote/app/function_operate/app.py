@@ -2,7 +2,6 @@ import boto3
 import logging
 import json
 import crhelper
-import requests
 import datetime
 from datetime import datetime
 import valve.source.master_server
@@ -48,17 +47,15 @@ def lambda_handler(event, _):
     logger.info('Initializing master server processor')
 
     if 'body' not in event:
-        return {"error": True, "message": 'Request body is not set'}
+        return shared.reply_err(message='Request body is not set')
 
     body = json.loads(event['body'])
 
     if 'action' not in body:
-        return {"error": True, "message": 'Request action is not set in the body'}
+        return shared.reply_err(message='Request action is not set in the body')
 
     action = body['action']
     if action == 'fetch':
-        client = boto3.client('lambda')
-
         return handle_fetch_servers(body.get('regions', ["eu"]), body.get('game', 'garrysmod'), body.get('map', ''))
 
     return {"error": False, "message": 'ok'}
