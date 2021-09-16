@@ -1,0 +1,9 @@
+.idea/**
+**/.idea
+venv/
+**/.terraform
+**/.terraform*
+**/target
+
+**/.aws-sam
+remote/functions/build

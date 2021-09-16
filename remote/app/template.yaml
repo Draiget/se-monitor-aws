@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  app
+
+  Sample SAM Template for app
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+    Layers:
+      - !Ref SharedLayer
+
+Resources:
+  SmProcessFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: function_process/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Events:
+        Collect:
+          Type: Api
+          Properties:
+            Path: /collect
+            Method: get
+
+  SharedLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: sm_shared
+      ContentUri: shared/
+      Description: Dependencies for the Source Monitoring
+      CompatibleRuntimes:
+        - python3.7
+      RetentionPolicy: Delete
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  SmProcessFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt SmProcessFunction.Arn
+  SmProcessFunctionRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt SmProcessFunctionRole.Arn
