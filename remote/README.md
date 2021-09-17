@@ -21,7 +21,7 @@ https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/s
 
 https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-linux.html
 
-https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+AWS SAM - https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
 
 ## IAM Requirements
 

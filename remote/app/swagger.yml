@@ -1,0 +1,111 @@
+swagger: "2.0"
+info:
+  description: ""
+  version: "1.0.0"
+  title: "SE Monitor"
+  contact:
+    email: "draiget@zontwelg.com"
+host: "<aws>"
+basePath: "/"
+tags:
+- name: "operate"
+  description: "Control processing lambda"
+schemes:
+- "https"
+paths:
+  /operate:
+    post:
+      tags:
+      - "operate"
+      summary: "Submit player find query to the control Lambda function"
+      description: ""
+      operationId: "operateFind"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Find query properties for Lambda"
+        required: true
+        schema:
+          $ref: "#/definitions/ControlBody"
+      responses:
+        "200":
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/ControlResponse"
+        "404":
+          description: "Failed authentication"
+          schema:
+            $ref: "#/definitions/ControlResponseErrorAuth"
+        "500":
+          description: "Internal server error (or API GW routing issues)"
+          schema:
+            $ref: "#/definitions/ControlResponseErrorInternal"
+      security:
+      - api_key: []
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  ControlBody:
+    type: "object"
+    properties:
+      action:
+        type: "string"
+      query:
+        type: "object"
+        properties:
+          map:
+            type: "string"
+          player:
+            type: "string"
+          regions:
+            type: "array"
+            items:
+              type: "string"
+            example: ["eu"]
+          game:
+            type: "string"
+            example: "garrysmod"
+  ControlResponseErrorAuth:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        example: "Missing Authenrication Token"
+  ControlResponseErrorInternal:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        example: "Internal server error"
+  ControlResponse:
+    type: "object"
+    properties:
+      error:
+        type: "boolean"
+        example: false
+      fetched:
+        type: "integer"
+        example: 1
+      result:
+        type: "object"
+        properties:
+          server:
+            type: "string"
+          players:
+            type: array
+            items:
+              type: "object"
+              properties:
+                name:
+                  type: "string"
+                  example: "Draiget"
+                duration:
+                  type: "integer"
+                  example: "20206.15"
