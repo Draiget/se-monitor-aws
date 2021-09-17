@@ -16,4 +16,8 @@ curl \
   --data '{ "action": "find", "query": { "map": "gm_buildscapes_a2", "player": "Draiget", "regions": ["all"] }}'
 ```
 
-Where a `<KEY>` you can obrain running `terraform output -json` command after provisioning infrastructure.
+Where a `<KEY>` you can obtain running `terraform output -json` command after provisioning infrastructure.
+
+## Deploying
+
+Application can be deployed within FreeTier usage.

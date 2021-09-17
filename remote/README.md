@@ -90,7 +90,10 @@ Example caller user permissions:
                 "iam:ListPolicyVersions",
                 "iam:DeletePolicy"
             ],
-            "Resource": "arn:aws:iam::*:policy/sm-allow-process-call"
+            "Resource": [
+                "arn:aws:iam::*:policy/sm-allow-process-call",
+                "arn:aws:iam::*:policy/sm-allow-operate-db-access"
+            ]
         },
         {
             "Sid": "LambdaSpecific",
@@ -101,8 +104,19 @@ Example caller user permissions:
             ],
             "Resource": [
                 "arn:aws:lambda:*:*:function:sm-operate",
+                "arn:aws:lambda:*:*:function:sm-operator",
                 "arn:aws:lambda:*:*:function:sm-process",
                 "arn:aws:lambda:*:*:layer:sm_shared"
+            ]
+        },
+        {
+            "Sid": "S3Specific",
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::sm-lambda-bucket*"
             ]
         },
         {

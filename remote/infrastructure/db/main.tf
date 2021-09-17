@@ -5,15 +5,9 @@ resource "aws_dynamodb_table" "sm_servers_table" {
   read_capacity  = 20
   write_capacity = 20
   hash_key       = "IpPort"
-  range_key      = "Data"
 
   attribute {
     name = "IpPort"
-    type = "S"
-  }
-
-  attribute {
-    name = "Data"
     type = "S"
   }
 
@@ -32,13 +26,7 @@ resource "aws_dynamodb_table" "sm_players_table" {
   billing_mode   = "PROVISIONED"
   read_capacity  = 20
   write_capacity = 20
-  hash_key       = "IpPort"
-  range_key      = "Name"
-
-  attribute {
-    name = "IpPort"
-    type = "S"
-  }
+  hash_key       = "Name"
 
   attribute {
     name = "Name"

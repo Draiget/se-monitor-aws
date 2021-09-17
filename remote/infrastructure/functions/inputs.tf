@@ -42,3 +42,14 @@ variable "in_net_security_ids" {
   description = "List of security group IDs for lambda function"
   type = list(string)
 }
+
+#
+# DynamoDB table inputs
+#
+variable "in_db_servers_table_arn" {
+  description = "ARN for servers DynamoDB table"
+}
+
+variable "in_db_players_table_arn" {
+  description = "ARN for players DynamoDB table"
+}

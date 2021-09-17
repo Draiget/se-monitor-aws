@@ -1,12 +1,10 @@
 import boto3
 import logging
 import json
-import crhelper
 
 import shared
 
 logger = logging.getLogger(__name__)
-helper = crhelper.CfnResource(json_logging=True, log_level='DEBUG')
 
 
 def lambda_handler(event, _):
@@ -26,6 +24,8 @@ def lambda_handler(event, _):
         return shared.reply_err(message='Request action is not set in the body')
 
     action = body['action']
+
+    # TODO: Flask integration will be more useful if future API will expand
     if action == 'find':
         query = body['query']
 
