@@ -1,4 +1,6 @@
-
+#
+# Servers cache table definition (DynamoDB)
+#
 resource "aws_dynamodb_table" "sm_servers_table" {
   name           = "servers"
   billing_mode   = "PROVISIONED"
@@ -21,6 +23,9 @@ resource "aws_dynamodb_table" "sm_servers_table" {
   }
 }
 
+#
+# Players cache table definition (DynamoDB)
+#
 resource "aws_dynamodb_table" "sm_players_table" {
   name           = "players"
   billing_mode   = "PROVISIONED"

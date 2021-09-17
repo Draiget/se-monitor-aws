@@ -1,4 +1,3 @@
-
 #
 # Operational Lambda description
 #
@@ -43,7 +42,3 @@ resource "aws_api_gateway_integration" "sm_gw_operate_integration" {
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.sm_gw_operate_lambda.invoke_arn
 }
-
-#
-# Triggers
-#

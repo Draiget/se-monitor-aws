@@ -21,6 +21,8 @@ resource "aws_lambda_function" "sm_gw_process_lambda" {
 
 #
 # Triggers
+# TODO: Could be used trigger for automatic scanning of servers by common filter and caching them like a
+# complete monitoring
 #
 
 #resource "aws_cloudwatch_event_rule" "sm_process_servers" {
