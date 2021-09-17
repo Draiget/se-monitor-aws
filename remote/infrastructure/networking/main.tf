@@ -11,26 +11,159 @@ resource "aws_vpc" "sm_vpc_main" {
   cidr_block = "10.0.0.0/16"
 
   tags = {
-    purpose = "Main project VPC"
+    Purpose = "Main project VPC"
+    Name = "main-vpc"
   }
 }
 
-resource "aws_subnet" "sm_lambda_subnet" {
-  cidr_block = "10.0.1.0/24"
+resource "aws_eip" "sm_lb" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.sm_internet_gw]
+
+  tags = {
+    Name = "sm-public-eip"
+  }
+}
+
+#
+# Internet gateway
+#
+resource "aws_internet_gateway" "sm_internet_gw" {
   vpc_id = aws_vpc.sm_vpc_main.id
 
   tags = {
-    purpose = "Lambdas subnet"
+    Name = "sm-internet-gw"
   }
 }
 
+#
+# NAT gateway
+#
+resource "aws_nat_gateway" "sm_nat_gw" {
+  allocation_id = aws_eip.sm_lb.id
+  subnet_id     = aws_subnet.sm_lambda_public_subnet.id
+
+  tags = {
+    Name = "sm-nat-gateway"
+  }
+}
+
+#
+# Subnets (Public/Private)
+#
+resource "aws_subnet" "sm_lambda_public_subnet" {
+  cidr_block              = "10.0.2.0/24"
+  vpc_id                  = aws_vpc.sm_vpc_main.id
+  map_public_ip_on_launch = "true"
+
+  tags = {
+    Purpose = "Internet access public subnet"
+    Name = "sm-public-subnet"
+  }
+}
+
+resource "aws_subnet" "sm_lambda_private_subnet" {
+  cidr_block              = "10.0.1.0/24"
+  vpc_id                  = aws_vpc.sm_vpc_main.id
+  map_public_ip_on_launch = false
+
+  tags = {
+    Purpose = "Lambdas private subnet"
+    Name = "private-subnet"
+  }
+}
+
+resource "aws_network_acl" "sm_lambda_subnet_acl" {
+  vpc_id     = aws_vpc.sm_vpc_main.id
+  subnet_ids = [aws_subnet.sm_lambda_public_subnet.id, aws_subnet.sm_lambda_private_subnet.id]
+
+  ingress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  egress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  tags = {
+    Name = "public-subnet-acl"
+  }
+}
+
+#
+# Route tables
+#
+resource "aws_route_table" "sm_public_rt" {
+  vpc_id = aws_vpc.sm_vpc_main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.sm_internet_gw.id
+  }
+
+  tags = {
+    Name = "sm-public-subnet-rt"
+  }
+}
+
+resource "aws_route_table" "sm_private_rt" {
+  vpc_id = aws_vpc.sm_vpc_main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.sm_nat_gw.id
+  }
+
+  tags = {
+    Name = "sm-private-subnet-rt"
+  }
+}
+
+resource "aws_route_table_association" "sm_public_subnet_associate" {
+  subnet_id      = aws_subnet.sm_lambda_public_subnet.id
+  route_table_id = aws_route_table.sm_public_rt.id
+}
+
+resource "aws_route_table_association" "sm_private_subnet_associate" {
+  subnet_id      = aws_subnet.sm_lambda_private_subnet.id
+  route_table_id = aws_route_table.sm_private_rt.id
+}
+
+#
+# Security group
+#
 resource "aws_security_group" "sm_vpc" {
   name        = "main_lambda_sg"
   description = "Security group for Lambda functions"
   vpc_id      = aws_vpc.sm_vpc_main.id
 
+  ingress {
+    protocol  = -1
+    self      = true
+    from_port = 0
+    to_port   = 0
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
   tags = {
-    Name = "allow_tls"
+    Name = "sm-lambda-sg"
   }
 }
 
@@ -50,19 +183,10 @@ resource "aws_api_gateway_rest_api" "se_api_gw" {
 }
 
 #
-# Endpoints (resources) for two lambda
-# 1. For operate
-# 2. For process
+# Endpoint for operate
 #
 resource "aws_api_gateway_resource" "se_api_gw_operate_resource" {
   path_part   = "operate"
-
-  parent_id   = aws_api_gateway_rest_api.se_api_gw.root_resource_id
-  rest_api_id = aws_api_gateway_rest_api.se_api_gw.id
-}
-
-resource "aws_api_gateway_resource" "se_api_gw_process_resource" {
-  path_part   = "process"
 
   parent_id   = aws_api_gateway_rest_api.se_api_gw.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.se_api_gw.id
@@ -74,16 +198,6 @@ resource "aws_api_gateway_resource" "se_api_gw_process_resource" {
 resource "aws_api_gateway_method" "se_api_gw_operate_method" {
   rest_api_id   = aws_api_gateway_rest_api.se_api_gw.id
   resource_id   = aws_api_gateway_resource.se_api_gw_operate_resource.id
-
-  http_method   = "POST"
-  authorization = "NONE"
-
-  api_key_required = true
-}
-
-resource "aws_api_gateway_method" "se_api_gw_process_method" {
-  rest_api_id   = aws_api_gateway_rest_api.se_api_gw.id
-  resource_id   = aws_api_gateway_resource.se_api_gw_process_resource.id
 
   http_method   = "POST"
   authorization = "NONE"
@@ -107,8 +221,8 @@ resource "aws_api_gateway_deployment" "se_gw_api_deployment" {
     #       It will stabilize to only change when resources change afterwards.
     redeployment = sha1(jsonencode([
       aws_api_gateway_rest_api.se_api_gw.body,
-      aws_api_gateway_resource.se_api_gw_process_resource.id,
-      aws_api_gateway_method.se_api_gw_process_method.id,
+      aws_api_gateway_resource.se_api_gw_operate_resource.id,
+      aws_api_gateway_method.se_api_gw_operate_method.id,
     ]))
   }
 

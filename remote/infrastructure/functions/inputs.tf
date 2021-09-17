@@ -7,6 +7,10 @@ variable "in_api_gw_id" {
   description = "Id of API gateway resource"
 }
 
+variable "in_api_gw_execution_arn" {
+  description = "Execution ARN of API GW"
+}
+
 #
 # Operate related
 #
@@ -21,22 +25,6 @@ variable "in_api_gw_operate_resource_id" {
 
 variable "in_api_gw_operate_resource_path" {
   description = "Id of API gateway resource path for operate endpoint"
-}
-
-#
-# Process related
-#
-variable "in_api_gw_process_method" {
-  description = "Id of API gateway for Process method"
-  type = string
-}
-
-variable "in_api_gw_process_resource_id" {
-  description = "Id of API gateway Process resource"
-}
-
-variable "in_api_gw_process_resource_path" {
-  description = "Id of API gateway resource path for process endpoint"
 }
 
 #

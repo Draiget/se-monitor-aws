@@ -54,25 +54,7 @@ Example caller user permissions:
             "Sid": "VPC",
             "Effect": "Allow",
             "Action": [
-                "ec2:CreateVpc",
-                "ec2:CreateTags",
-                "ec2:DescribeTags",
-                "ec2:DescribeVpc*",
-                "ec2:CreateNetworkInterface",
-                "ec2:DeleteNetworkInterface",
-                "ec2:AssignPrivateIpAddresses",
-                "ec2:UnassignPrivateIpAddresses",
-                "ec2:DeleteVpc",
-                "ec2:DescribeNetwork*",
-                "ec2:DescribeRouteTables",
-                "ec2:DescribeSecurityGroups",
-                "ec2:DescribeRouteTables",
-                "ec2:DescribeSubnets",
-                "ec2:CreateSecurityGroup",
-                "ec2:RevokeSecurityGroup*",
-                "ec2:DeleteSecurityGroup",
-                "ec2:CreateSubnet",
-                "ec2:DeleteSubnet"
+                "ec2:*"
             ],
             "Resource": "*"
         },
@@ -81,6 +63,7 @@ Example caller user permissions:
             "Effect": "Allow",
             "Action": [
                 "iam:GetRole",
+                "iam:CreateRole",
                 "iam:ListInstanceProfilesForRole",
                 "iam:ListAttachedRolePolicies",
                 "iam:CreateRole",
@@ -88,19 +71,36 @@ Example caller user permissions:
                 "iam:ListRolePolicies",
                 "iam:PassRole",
                 "iam:UpdateAssumeRolePolicy",
-                "iam:AttachRolePolicy"
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy",
+                "iam:UpdateRoleDescription"
             ],
             "Resource": [
-                "arn:aws:iam::*:role/batch_lambda_iam_role",
-                "arn:aws:iam::*:role/operational_lambda_iam_role"
+                "arn:aws:iam::*:role/process_lambda_iam_role",
+                "arn:aws:iam::*:role/operate_lambda_iam_role"
             ]
+        },
+        {
+            "Sid": "AllowCreatePolicies",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreatePolicy",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:ListPolicyVersions",
+                "iam:DeletePolicy"
+            ],
+            "Resource": "arn:aws:iam::*:policy/sm-allow-process-call"
         },
         {
             "Sid": "LambdaSpecific",
             "Effect": "Allow",
-            "Action": "lambda:*",
+            "Action": [
+                "lambda:*",
+                "ec2:*"
+            ],
             "Resource": [
-                "arn:aws:lambda:*:*:function:sm-operator",
+                "arn:aws:lambda:*:*:function:sm-operate",
                 "arn:aws:lambda:*:*:function:sm-process",
                 "arn:aws:lambda:*:*:layer:sm_shared"
             ]

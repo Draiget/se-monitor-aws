@@ -19,6 +19,7 @@ data "aws_caller_identity" "current" {}
 resource "aws_s3_bucket_object" "sm_s3_shared_layer" {
   bucket = aws_s3_bucket.sm_lambda_bucket.id
   key    = "lambda/layers/shared.zip"
+  etag   = filemd5("${local.lambda_base_path}/shared.zip")
 
   # depends_on = [null_resource.sm_pack_operator_lambda]
   source = "${local.lambda_base_path}/shared.zip"

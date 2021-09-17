@@ -1,0 +1,10 @@
+{
+  "body": {
+    "action": "find",
+    "query": {
+      "map": "gm_buildscapes_a2",
+      "player": "Elerith",
+      "regions": ["all"]
+    }
+  }
+}
